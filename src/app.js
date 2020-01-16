@@ -1,7 +1,7 @@
-const yargs = require('yargs');
-const fs = require('fs');
-const OPTIONS = require('./constants');
-const createMyStream = require('./helpers/transformStreamCreator');
+import yargs from 'yargs';
+import fs from 'fs';
+import OPTIONS from './constants';
+import TransformStreamCreator from './helpers/transformStreamCreator';
 
 const options = yargs
     .usage("Usage: -sourceFile <sourceFile> /n -resultFile <resultFile> /n -separator <separator>")
@@ -10,7 +10,7 @@ const options = yargs
 
 let readStream = fs.createReadStream(options.sourceFile);
 let writeStream = fs.createWriteStream(options.resultFile);
-let myStream = createMyStream();
+let myStream = new TransformStreamCreator();
 
 readStream
     .pipe(myStream)

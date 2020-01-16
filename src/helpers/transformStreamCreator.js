@@ -1,13 +1,29 @@
-const stream = require('stream');
-const parser = require('./csvToJsonParser');
+import stream from 'stream';
 
-function createMyStream(){
-    return new stream.Transform({
-        transform: (chunk, encoding, callback) => {
-            parser(chunk.toString());
-            callback(null, chunk);
+export class TransformStreamCreator extends stream.Transform {
+    constructor() {
+        super();
+        this.headers = [];
+    }
+
+    _transform(chunk, encoding, callback) {
+        const data = this.parser(chunk);
+        callback(null, JSON.stringify(data, null, 4));
+    }
+
+    parser(chunk) {
+        let lines = chunk.toString().split("\r");
+
+        if(!this.headers.length) {
+            this.headers = lines.shift().split(",");
+            console.log(lines);
+        } else {
+            return lines.map((line) => {
+                let lineItems = line.split(",");
+                return this.headers.reduce((o, k, i) => ({...o, [k]: lineItems[i]}), {})
+            });
         }
-    });
+    }
 }
 
-module.exports = createMyStream;
+export default TransformStreamCreator;
