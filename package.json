@@ -1,7 +1,0 @@
-{
-  "name": "csv-parser",
-  "version": "1.0.0",
-  "dependencies": {
-    "yargs": "^15.1.0"
-  }
-}
