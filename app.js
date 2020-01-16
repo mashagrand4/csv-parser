@@ -19,12 +19,12 @@ const fileToBuffer = (path) => {
         //return cb(err);
     });
 
-    readStream.pipe(fs.createWriteStream('copy.csv')).on('data', chunk => {
-        //console.log(chunk.toString());
+    readStream.on('data', chunk => {
+        console.log(chunk.toString());
     });
 
     readStream.on('close', () => {
-        console.log(readStream);
+        //console.log(readStream);
         //console.log(chunks.toString());
         //return cb(null, Buffer.concat(chunks));
     });
