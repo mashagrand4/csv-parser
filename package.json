@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "dependencies": {
     "yargs": "^15.1.0"
+  },
+  "scripts": {
+    "start": "node src/app.js --sourceFile src/files/test-csv.csv  --resultFile src/files/cope.txt --separator \",\""
   }
 }
