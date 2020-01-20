@@ -1,6 +1,6 @@
 import stream from 'stream';
 
-export class TransformStreamCreator extends stream.Transform {
+export class TransformStreamToParse extends stream.Transform {
     constructor() {
         super();
         this.headers = [];
@@ -50,4 +50,4 @@ export class TransformStreamCreator extends stream.Transform {
     }
 }
 
-export default TransformStreamCreator;
+export default TransformStreamToParse;
