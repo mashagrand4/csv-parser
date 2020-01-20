@@ -45,7 +45,11 @@ export class TransformStreamToParse extends stream.Transform {
 
         return lines.map((line) => {
             let lineItems = line.split(",");
-            return this.headers.reduce((o, k, i) => ({...o, [k]: lineItems[i]}), {})
+            let result = {};
+
+            this.headers.forEach((header, index) => result[header] = lineItems[index]);
+
+            return result;
         });
     }
 }
