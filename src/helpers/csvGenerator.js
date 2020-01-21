@@ -2,20 +2,19 @@ import fs from "fs";
 
 const csvGenerator = (sourcePath, resultPath) => {
     let readStream = fs.createReadStream(sourcePath, { highWaterMark: 1024 * 1024 });
-    let writeStream = fs.createWriteStream(resultPath, {flags: 'a'});
-
-    readStream.on('data', (data) => {
-            let lines = data.toString().split("\r");
-            let headers = lines.shift();
-            writeStream.write(Buffer.from(headers + '\r\n'));
-            for(let i = 0; i < 1000; i++) {
-                for(let j = 0; j < lines.length; j++) {
-                    writeStream.write(Buffer.from(lines[j] + "\r\n"));
-                }
-            }
+    let writeStream = fs.createWriteStream(resultPath, { flags: 'w' });
+    readStream.on('data', chunk => {
+        const data = chunk.toString();
+        const headersEnd = data.indexOf('\r');
+        const headers = data.substring(0, headersEnd);
+        const rows = data.substring(headersEnd);
+        writeStream.write(headers);
+        for (let i = 0; i < 1000; i++) {
+            writeStream.write(rows);
+        }
+        writeStream.end();
     });
-
-    return readStream;
+    return writeStream;
 };
 
 export default csvGenerator;
