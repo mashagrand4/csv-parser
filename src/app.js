@@ -1,6 +1,7 @@
 import yargs from 'yargs';
 import fs from 'fs';
-import OPTIONS from './constants';
+import OPTIONS from './constants/params';
+import {TEMP_CSV_PATH} from './constants/other';
 import TransformStreamToParse from './helpers/transformStreamToParse';
 import csvGenerator from "./helpers/csvGenerator";
 
@@ -9,13 +10,13 @@ const options = yargs
     .options(OPTIONS)
     .argv;
 
-let readStream = fs.createReadStream(options.sourceFile);
-let writeStream = fs.createWriteStream(options.resultFile);
-let myStream = new TransformStreamToParse();
+csvGenerator(options.sourceFile, TEMP_CSV_PATH).on('close', () => {
+    let readStream = fs.createReadStream(TEMP_CSV_PATH);
+    let writeStream = fs.createWriteStream(options.resultFile);
+    let myStream = new TransformStreamToParse();
 
-readStream
-    .pipe(myStream)
-    .pipe(writeStream);
-
-csvGenerator(options.sourceFile, "src/files/big.csv");
+    readStream
+        .pipe(myStream)
+        .pipe(writeStream);
+});
 

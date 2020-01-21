@@ -1,0 +1,1 @@
+export const TEMP_CSV_PATH = 'src/files/big.csv';

@@ -5,12 +5,11 @@ export class TransformStreamToParse extends stream.Transform {
         super();
         this.headers = [];
         this.lastLine = '';
-        this.firstChunk = true;
     }
 
     _transform(chunk, encoding, callback) {
         try {
-            const data = this.parser(chunk);
+            const data = this.parseToJson(chunk);
             callback(null, JSON.stringify(data, null, 4));
         }
         catch (err) {
@@ -21,8 +20,9 @@ export class TransformStreamToParse extends stream.Transform {
     _flush(callback) {
         if (this.lastLine) {
             try {
-                const data = this.parser(this.lastLine);
+                let lastLine = this.lastLine;
                 this.lastLine = '';
+                const data = this.parseToJson(lastLine);
                 callback(null, JSON.stringify(data, null, 4));
             }
             catch (err) {
@@ -31,25 +31,27 @@ export class TransformStreamToParse extends stream.Transform {
         }
     }
 
-    parser(chunk) {
-        let lines = chunk.toString().split("\r");
+    parseToJson(chunk) {
+        let lines = chunk.toString();
+        lines = this.lastLine.concat(lines).split("\r");
 
-        if (this.firstChunk) {
+        if (!this.headers.length) {
             this.headers = lines.shift().split(",");
-            this.firstChunk = false;
-            this.lastLine = lines.pop();
-        } else {
-            lines.unshift(this.lastLine);
+        }
+
+        if(lines.length > 1) {
             this.lastLine = lines.pop();
         }
 
         return lines.map((line) => {
             let lineItems = line.split(",");
-            let result = {};
 
-            this.headers.forEach((header, index) => result[header] = lineItems[index]);
-
-            return result;
+            return this.headers.reduce((result, headerKey, index) => {
+                return ({
+                    ...result,
+                    [headerKey]: lineItems[index]
+                });
+            }, {});
         });
     }
 }

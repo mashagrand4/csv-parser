@@ -7,13 +7,15 @@ const csvGenerator = (sourcePath, resultPath) => {
     readStream.on('data', (data) => {
             let lines = data.toString().split("\r");
             let headers = lines.shift();
-            writeStream.write(Buffer.from(headers + "\n"));
-            for(let i = 0; i < 10000; i++) {
+            writeStream.write(Buffer.from(headers + '\r\n'));
+            for(let i = 0; i < 1000; i++) {
                 for(let j = 0; j < lines.length; j++) {
-                    writeStream.write(Buffer.from(lines[j] + "\n"));
+                    writeStream.write(Buffer.from(lines[j] + "\r\n"));
                 }
             }
     });
+
+    return readStream;
 };
 
 export default csvGenerator;
