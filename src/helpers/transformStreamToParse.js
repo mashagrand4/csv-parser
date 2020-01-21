@@ -1,8 +1,8 @@
 import stream from 'stream';
 
 export class TransformStreamToParse extends stream.Transform {
-    constructor() {
-        super();
+    constructor(options) {
+        super(options);
         this.headers = [];
         this.lastLine = '';
     }
