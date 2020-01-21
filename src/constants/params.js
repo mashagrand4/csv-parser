@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     'sourceFile': {
         alias: "sourceFile",
         describe: "Source file path",
@@ -17,4 +17,4 @@ module.exports = {
         type: "string",
         demandOption: true
     },
-}
+};

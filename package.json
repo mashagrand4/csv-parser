@@ -5,6 +5,11 @@
     "yargs": "^15.1.0"
   },
   "scripts": {
-    "start": "node src/app.js --sourceFile src/files/test-csv.csv  --resultFile src/files/cope.txt --separator \",\""
+    "start": "babel-node src/app.js --sourceFile src/files/test.csv  --resultFile src/files/copy.json --separator \",\""
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/node": "^7.8.3",
+    "@babel/preset-env": "^7.8.3"
   }
 }
