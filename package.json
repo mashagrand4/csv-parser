@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "googleapis": "^47.0.0",
+    "open": "^7.0.0",
     "yargs": "^15.1.0"
   },
   "scripts": {

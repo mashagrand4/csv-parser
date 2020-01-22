@@ -9,7 +9,7 @@ const csvGenerator = (sourcePath, resultPath) => {
         const headers = data.substring(0, headersEnd);
         const rows = data.substring(headersEnd);
         writeStream.write(headers);
-        for (let i = 0; i < 1000; i++) {
+        for (let i = 0; i < 10; i++) {
             writeStream.write(rows);
         }
         writeStream.end();
