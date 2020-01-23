@@ -7,46 +7,48 @@ import getUrlParams from "../../helpers/getUrlParams";
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
 
-const authorize = (credentials, callback) => {
-    const {client_secret, client_id, redirect_uri} = credentials;
-    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
+const authorize = async (credentials) => {
+    return new Promise(async (resolve, reject) => {
+        const {client_secret, client_id, redirect_uri} = credentials;
+        const oAuth2Client = await new google.auth.OAuth2(client_id, client_secret, redirect_uri);
 
-    fs.readFile(TOKEN_PATH, (err, token) => {
-        if (err) return getAccessToken(oAuth2Client, callback);
-
-        oAuth2Client.setCredentials(JSON.parse(token));
-        callback(oAuth2Client);
+        await fs.readFile(TOKEN_PATH, async (err, token) => {
+            if (err) {
+                resolve(await getAccessToken(oAuth2Client));
+            } else {
+                resolve(await oAuth2Client.setCredentials(JSON.parse(token)));
+            }
+        });
     });
 };
 
-const getAccessToken = (oAuth2Client, callback) => {
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
+const getAccessToken = async (oAuth2Client) => {
+    return new Promise((resolve, reject) => {
+        const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+        });
 
-    const server = http
-        .createServer(async (req, res) => {
-            if (req.url.indexOf('/callback') > -1) {
-                const code = decodeURIComponent(getUrlParams(url).code);
+        const server = http
+            .createServer( async (req, res) => {
+                if (req.url.indexOf('/callback') > -1) {
+                    const code = decodeURIComponent(getUrlParams(req.url).code);
 
-                res.end('Authentication successful! Please return to the console.');
-                server.close();
+                    res.end('Authentication successful! Please return to the console.');
+                    server.close();
 
-                oAuth2Client.getToken(code, (err, token) => {
-                    if (err) return console.error('Error retrieving access token', err);
-
-                    oAuth2Client.setCredentials(token);
-                    fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                    const {tokens} = await oAuth2Client.getToken(code);
+                    await oAuth2Client.setCredentials(tokens);
+                    await fs.writeFile(TOKEN_PATH, JSON.stringify(tokens), (err) => {
                         if (err) return console.error(err);
                     });
-                    callback(oAuth2Client);
-                });
-            }
-        })
-        .listen(3000, () => {
-            opn(authUrl, {wait: false}).then(cp => cp.unref());
-        });
+                    resolve(oAuth2Client);
+                }
+            })
+            .listen(3000, () => {
+                opn(authUrl, {wait: false}).then(childProcess => childProcess.unref());
+            });
+    });
 };
 
 export default authorize;

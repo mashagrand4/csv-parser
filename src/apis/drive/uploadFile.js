@@ -1,7 +1,11 @@
 import {google} from "googleapis";
 import fs from "fs";
+import authorize from "./authorize";
+import {CREDENTIALS} from '../../constants/credentials'
 
-const loadFile = async (auth, options) => {
+const uploadFile = async options => {
+    const auth = await authorize(CREDENTIALS);
+
     const drive = google.drive({
         version: 'v3',
         auth
@@ -21,4 +25,4 @@ const loadFile = async (auth, options) => {
     console.log(res.data);
 };
 
-export default loadFile;
+export default uploadFile;
