@@ -4,6 +4,7 @@ import OPTIONS from './constants/params';
 import {TEMP_CSV_PATH} from './constants/other';
 import TransformStreamToParse from './helpers/transformStreamToParse';
 import csvGenerator from "./helpers/csvGenerator";
+import uploadFile from "./apis/drive/uploadFile";
 
 const options = yargs
     .usage("Usage: -sourceFile <sourceFile> /n -resultFile <resultFile> /n -separator <separator>")
@@ -18,5 +19,12 @@ csvGenerator(options.sourceFile, TEMP_CSV_PATH).on('close', () => {
     readStream
         .pipe(myStream)
         .pipe(writeStream);
-});
 
+    writeStream.on("finish", () => {
+            uploadFile({
+                name: "parsed.json",
+                mimeType: "application/json",
+                path: options.resultFile
+            }).catch(console.error);
+    });
+});
