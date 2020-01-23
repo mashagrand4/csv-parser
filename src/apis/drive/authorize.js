@@ -7,22 +7,31 @@ import getUrlParams from "../../helpers/getUrlParams";
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
 
-const authorize = async (credentials) => {
+const authorize = credentials => {
     return new Promise(async (resolve, reject) => {
         const {client_secret, client_id, redirect_uri} = credentials;
-        const oAuth2Client = await new google.auth.OAuth2(client_id, client_secret, redirect_uri);
+        const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
 
-        await fs.readFile(TOKEN_PATH, async (err, token) => {
+        await fs.readFile(TOKEN_PATH, async (err, currentToken) => {
+            let token;
             if (err) {
-                resolve(await getAccessToken(oAuth2Client));
+                token = await getAccessToken(oAuth2Client);
+                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                    if (err) return console.error(err);
+
+                    oAuth2Client.setCredentials(token);
+                    resolve(oAuth2Client);
+                });
             } else {
-                resolve(await oAuth2Client.setCredentials(JSON.parse(token)));
+                token = JSON.parse(currentToken);
+                oAuth2Client.setCredentials(token);
+                resolve(oAuth2Client);
             }
         });
     });
 };
 
-const getAccessToken = async (oAuth2Client) => {
+const getAccessToken = oAuth2Client => {
     return new Promise((resolve, reject) => {
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
@@ -37,12 +46,9 @@ const getAccessToken = async (oAuth2Client) => {
                     res.end('Authentication successful! Please return to the console.');
                     server.close();
 
-                    const {tokens} = await oAuth2Client.getToken(code);
-                    await oAuth2Client.setCredentials(tokens);
-                    await fs.writeFile(TOKEN_PATH, JSON.stringify(tokens), (err) => {
-                        if (err) return console.error(err);
-                    });
-                    resolve(oAuth2Client);
+                    const {tokens: token} = await oAuth2Client.getToken(code);
+
+                    resolve(token);
                 }
             })
             .listen(3000, () => {
